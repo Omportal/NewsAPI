@@ -10,7 +10,8 @@ from .serializers import NewsSerializer, CommentsSerializer, LikesSerializer
 from news.models import News, Comments, Likes
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from .permission import SelfCommentsOrCommentsSelfNews, IsAuthor
+from .permission import SelfCommentsOrCommentsSelfNews, IsAuthorOrAdmin, IsAuthorCommentOrAdmin
+from rest_framework.response import Response
 
 
 class NewsList(ListCreateAPIView):
@@ -27,7 +28,7 @@ class NewsList(ListCreateAPIView):
 
 class NewsRetrieveUpdate(RetrieveUpdateAPIView):
     serializer_class = NewsSerializer
-    permission_classes = [IsAuthor, permissions.IsAuthenticatedOrReadOnly, permissions.IsAdminUser]
+    permission_classes = [IsAuthorOrAdmin]
 
     def get_queryset(self):
         return News.objects.all()
@@ -35,7 +36,7 @@ class NewsRetrieveUpdate(RetrieveUpdateAPIView):
 
 class NewsRetrieveDestroy(RetrieveDestroyAPIView):
     serializer_class = NewsSerializer
-    permission_classes = [IsAuthor, permissions.IsAuthenticated, permissions.IsAdminUser]
+    permission_classes = [IsAuthorOrAdmin]
 
     def get_queryset(self):
         return News.objects.all()
@@ -55,8 +56,7 @@ class CommentsList(ListCreateAPIView):
 
 class CommentsRetrieveUpdate(RetrieveUpdateAPIView):
     serializer_class = CommentsSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, SelfCommentsOrCommentsSelfNews,
-                          permissions.IsAdminUser]
+    permission_classes = [IsAuthorCommentOrAdmin]
 
     def get_queryset(self):
         return Comments.objects.all()
@@ -65,7 +65,7 @@ class CommentsRetrieveUpdate(RetrieveUpdateAPIView):
 class CommentsRetrieveDestroy(RetrieveDestroyAPIView):
     serializer_class = CommentsSerializer
 
-    permission_classes = [permissions.IsAuthenticated, SelfCommentsOrCommentsSelfNews, permissions.IsAdminUser]
+    permission_classes = [SelfCommentsOrCommentsSelfNews]
 
     def get_queryset(self):
         return Comments.objects.all()
@@ -79,7 +79,9 @@ class LikesCreate(CreateAPIView):
         return Likes.objects.all()
 
     def perform_create(self, serializer):
-        serializer.save(likes_from=self.request.user, likes_to=self.kwargs['pk'])
+        likes_data = Likes.objects.filter(likes_from=self.request.user, likes_to=self.kwargs['pk'])
+        if not likes_data:
+            serializer.save(likes_from=self.request.user, likes_to=self.kwargs['pk'])
 
 
 @csrf_exempt
@@ -96,6 +98,7 @@ def signup(request):
             return JsonResponse({'token': str(token)}, status=201)
         except IntegrityError:
             return JsonResponse({'error': 'username taken. choose another username'}, status=400)
+    return JsonResponse({'error': 'enter username and password'}, status=201)
 
 
 @csrf_exempt
@@ -111,3 +114,4 @@ def login(request):
             except:
                 token = Token.objects.create(user=user)
             return JsonResponse({'token': str(token)}, status=201)
+    return JsonResponse({'error': 'enter username and password'}, status=201)
