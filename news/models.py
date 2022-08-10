@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import UniqueConstraint
 from django.contrib.auth.models import User
 
 
@@ -32,9 +31,3 @@ class Comments(models.Model):
 class Likes(models.Model):
     likes_to = models.PositiveIntegerField()
     likes_from = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name_plural = 'Likes'
-
-    def __str__(self):
-        return f"{self.likes_to} от {self.likes_from}"

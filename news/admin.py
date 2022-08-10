@@ -5,4 +5,3 @@ from .models import News, Comments,Likes
 
 admin.site.register(News)
 admin.site.register(Comments)
-admin.site.register(Likes)

@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView, \
+from rest_framework.generics import ListCreateAPIView, CreateAPIView, \
     RetrieveUpdateAPIView, RetrieveDestroyAPIView
 from rest_framework.parsers import JSONParser
 from django.db import IntegrityError
@@ -11,10 +11,10 @@ from news.models import News, Comments, Likes
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from .permission import SelfCommentsOrCommentsSelfNews, IsAuthorOrAdmin, IsAuthorCommentOrAdmin
-from rest_framework.response import Response
 
 
 class NewsList(ListCreateAPIView):
+    """Получаем список всех новостей с пагинацией"""
     serializer_class = NewsSerializer
 
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -27,6 +27,7 @@ class NewsList(ListCreateAPIView):
 
 
 class NewsRetrieveUpdate(RetrieveUpdateAPIView):
+    """Получаем одну новость со списком комментариев,изменить её могут только автор или админ"""
     serializer_class = NewsSerializer
     permission_classes = [IsAuthorOrAdmin]
 
@@ -35,6 +36,7 @@ class NewsRetrieveUpdate(RetrieveUpdateAPIView):
 
 
 class NewsRetrieveDestroy(RetrieveDestroyAPIView):
+    """Удаляем новость ,только автор или админ"""
     serializer_class = NewsSerializer
     permission_classes = [IsAuthorOrAdmin]
 
@@ -43,6 +45,7 @@ class NewsRetrieveDestroy(RetrieveDestroyAPIView):
 
 
 class CommentsList(ListCreateAPIView):
+    """Получаем список всех комментариев к новости,авторизованные юзеры могут создавать комментарии"""
     serializer_class = CommentsSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -55,6 +58,7 @@ class CommentsList(ListCreateAPIView):
 
 
 class CommentsRetrieveUpdate(RetrieveUpdateAPIView):
+    """Получем один комментарий ,изменить могут только автор или админ"""
     serializer_class = CommentsSerializer
     permission_classes = [IsAuthorCommentOrAdmin]
 
@@ -63,6 +67,7 @@ class CommentsRetrieveUpdate(RetrieveUpdateAPIView):
 
 
 class CommentsRetrieveDestroy(RetrieveDestroyAPIView):
+    """Удаляем комментарий ,только для автора или или админа, или, если комментарий к новости автора"""
     serializer_class = CommentsSerializer
 
     permission_classes = [SelfCommentsOrCommentsSelfNews]
@@ -72,6 +77,9 @@ class CommentsRetrieveDestroy(RetrieveDestroyAPIView):
 
 
 class LikesCreate(CreateAPIView):
+    """Ставим лайк по POST запросу ,PK новости в URL адресе
+        Проверка чтобы нельзя было поставить два лайка от одного юзера одной новости.
+    """
     serializer_class = LikesSerializer
     permissions = [permissions.IsAuthenticated]
 
@@ -86,6 +94,7 @@ class LikesCreate(CreateAPIView):
 
 @csrf_exempt
 def signup(request):
+    """Метод для регистрации нового юзера"""
     if request.method == 'POST':
         try:
             data = JSONParser().parse(request)
@@ -103,6 +112,7 @@ def signup(request):
 
 @csrf_exempt
 def login(request):
+    """Логинимся ,проверка наличие токена в базе данных"""
     if request.method == 'POST':
         data = JSONParser().parse(request)
         user = authenticate(request, username=data['username'], password=data['password'])

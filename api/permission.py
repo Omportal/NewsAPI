@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 
 class SelfCommentsOrCommentsSelfNews(permissions.BasePermission):
+    """Проверка является ли автор новости текущим юзером , для удаления комментариев к своей новости"""
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_staff:
@@ -24,6 +25,8 @@ class IsAuthorOrAdmin(permissions.BasePermission):
 class IsAuthorCommentOrAdmin(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        if request.user.is_staff:
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        elif request.user.is_staff:
             return True
         return obj.comment_author == request.user

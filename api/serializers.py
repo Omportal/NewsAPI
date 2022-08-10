@@ -1,6 +1,4 @@
-import requests
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from news.models import News, Comments, Likes
 
 
