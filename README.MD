@@ -1,7 +1,7 @@
 
                      ROUTING
 
-admin/                            GET--админка
+ADMIN/                            GET--админка
 news/                             GET,POST--список новостей,создание новости
 news/<int:pk>/                    GET,PUT--одна новость,изменение новости
 news/<int:pk>/delete/             DELETE--удаление новости
