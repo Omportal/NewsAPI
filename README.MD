@@ -1,3 +1,5 @@
+##http://212.193.50.185/news/
+
 ###admin/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET--админка
 ###news/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET,POST--список новостей,создание новости
 ###news/<int:pk>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET,PUT--одна новость,изменение новости
@@ -8,3 +10,7 @@
 ###news/<int:pk>/like/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POST--лайк
 ###auth/signup/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POST--регистрация нового пользователя
 ###auth/login/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POST-- Логин 
+
+### Логин для входа в админку: superuser ,пароль: superuser
+
+### Для развёртывания на сервере были использованы Gunicorn , Nginx 

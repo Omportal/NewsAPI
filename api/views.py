@@ -20,7 +20,7 @@ class NewsList(ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return News.objects.all().order_by('-published_date')
+        return News.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)

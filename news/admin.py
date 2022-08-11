@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import News, Comments,Likes
+from .models import News, Comments
 
 # Register your models here.
 
