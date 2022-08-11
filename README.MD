@@ -1,6 +1,4 @@
-
 ##http://212.193.50.185/news/
-
 ###admin/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET--админка
 ###news/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET,POST--список новостей,создание новости
 ###news/<int:pk>/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GET,PUT--одна новость,изменение новости
