@@ -10,3 +10,5 @@ http://212.193.50.185/
 ### news/<int:pk>/like/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POST--лайк
 ### auth/signup/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POST--регистрация нового пользователя
 ### auth/login/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POST-- Логин 
+
+Логин для входа в админку: superuser ,пароль: superuser
