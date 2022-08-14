@@ -16,7 +16,7 @@ from rest_framework import viewsets
 
 class NewsViewSet(viewsets.ModelViewSet):
     serializer_class = NewsSerializer
-    queryset = News.objects.all()
+    queryset = News.objects.all().select_related('author').prefetch_related('comment')
 
     def get_permissions(self):
         if self.action == 'list' or 'detail':
@@ -36,7 +36,7 @@ class CommentsList(ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        comments = Comments.objects.filter(news_id=self.kwargs['news_pk'])
+        comments = Comments.objects.filter(news_id=self.kwargs['news_pk']).select_related('comment_author')
         return comments
 
     def perform_create(self, serializer):
@@ -52,7 +52,7 @@ class CommentsRetrieveUpdate(RetrieveUpdateAPIView):
     permission_classes = [IsAuthorCommentOrAdmin]
 
     def get_queryset(self):
-        return Comments.objects.all()
+        return Comments.objects.all().select_related('comment_author')
 
 
 #
@@ -64,7 +64,7 @@ class CommentsRetrieveDestroy(RetrieveDestroyAPIView):
     permission_classes = [AuthorCommentsOrCommentsAuthorNews]
 
     def get_queryset(self):
-        return Comments.objects.all()
+        return Comments.objects.all().select_related('comment_author')
 
 
 #
