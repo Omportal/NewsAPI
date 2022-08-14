@@ -41,6 +41,6 @@ class NewsSerializer(serializers.HyperlinkedModelSerializer):
         return queryset
 
     def get_comment(self, obj):
-        queryset = obj.comment.all()[:10]
+        queryset = obj.comment.all().select_related("comment_author")[:10]
         request = self.context.get('request')
         return CommentsSerializer(queryset, many=True, context={'request': request}).data
