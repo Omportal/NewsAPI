@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class SelfCommentsOrCommentsSelfNews(permissions.BasePermission):
+class AuthorCommentsOrCommentsAuthorNews(permissions.BasePermission):
     """Проверка является ли автор новости текущим юзером , для удаления комментариев к своей новости"""
 
     def has_object_permission(self, request, view, obj):
