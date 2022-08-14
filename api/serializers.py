@@ -3,7 +3,7 @@ from news.models import News, Comments, Likes
 
 
 class CommentsSerializer(serializers.ModelSerializer):
-    comment_date = serializers.ReadOnlyField()
+    comment_date = serializers.DateTimeField(format="%Y-%m-%d  %H:%M:%S", read_only=True)
     comment_author = serializers.ReadOnlyField(source='comment_author.username')
     news_id = serializers.IntegerField(read_only=True)
 
@@ -18,12 +18,11 @@ class LikesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Likes
-
         fields = ['likes_to']
 
 
-class NewsSerializer(serializers.ModelSerializer):
-    published_date = serializers.ReadOnlyField()
+class NewsSerializer(serializers.HyperlinkedModelSerializer):
+    published_date = serializers.DateTimeField(format="%Y-%m-%d  %H:%M:%S", read_only=True)
     comment = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
     author = serializers.ReadOnlyField(source='author.username')
@@ -31,7 +30,7 @@ class NewsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = News
-        fields = ['id', 'title', 'description', 'author', 'published_date', 'likes', 'comments_count', 'comment']
+        fields = ['id', 'url', 'title', 'description', 'author', 'published_date', 'likes', 'comments_count', 'comment']
 
     def get_comments_count(self, obj):
         queryset = obj.comment.select_related("news").count()
@@ -43,4 +42,5 @@ class NewsSerializer(serializers.ModelSerializer):
 
     def get_comment(self, obj):
         queryset = obj.comment.all()[:10]
-        return CommentsSerializer(queryset, many=True).data
+        request = self.context.get('request')
+        return CommentsSerializer(queryset, many=True, context={'request': request}).data

@@ -10,72 +10,65 @@ from .serializers import NewsSerializer, CommentsSerializer, LikesSerializer
 from news.models import News, Comments, Likes
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-from .permission import SelfCommentsOrCommentsSelfNews, IsAuthorOrAdmin, IsAuthorCommentOrAdmin
+from .permission import AuthorCommentsOrCommentsAuthorNews, IsAuthorOrAdmin, IsAuthorCommentOrAdmin
+from rest_framework import viewsets
 
 
-class NewsList(ListCreateAPIView):
-    """Получаем список всех новостей с пагинацией"""
+class NewsViewSet(viewsets.ModelViewSet):
     serializer_class = NewsSerializer
+    queryset = News.objects.all()
 
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def get_queryset(self):
-        return News.objects.all()
+    def get_permissions(self):
+        if self.action == 'list' or 'detail':
+            permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+        else:
+            permission_classes = [IsAuthorOrAdmin]
+        return [permission() for permission in permission_classes]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 
-class NewsRetrieveUpdate(RetrieveUpdateAPIView):
-    """Получаем одну новость со списком комментариев,изменить её могут только автор или админ"""
-    serializer_class = NewsSerializer
-    permission_classes = [IsAuthorOrAdmin]
-
-    def get_queryset(self):
-        return News.objects.all()
-
-
-class NewsRetrieveDestroy(RetrieveDestroyAPIView):
-    """Удаляем новость ,только автор или админ"""
-    serializer_class = NewsSerializer
-    permission_classes = [IsAuthorOrAdmin]
-
-    def get_queryset(self):
-        return News.objects.all()
-
-
 class CommentsList(ListCreateAPIView):
     """Получаем список всех комментариев к новости,авторизованные юзеры могут создавать комментарии"""
     serializer_class = CommentsSerializer
+
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        comments = Comments.objects.filter(news_id=self.kwargs['pk'])
+        comments = Comments.objects.filter(news_id=self.kwargs['news_pk'])
         return comments
 
     def perform_create(self, serializer):
-        serializer.save(comment_author=self.request.user, news_id=self.kwargs['pk'])
+        serializer.save(comment_author=self.request.user, news_id=self.kwargs['news_pk'])
 
 
+#
+#
 class CommentsRetrieveUpdate(RetrieveUpdateAPIView):
     """Получем один комментарий ,изменить могут только автор или админ"""
     serializer_class = CommentsSerializer
+
     permission_classes = [IsAuthorCommentOrAdmin]
 
     def get_queryset(self):
         return Comments.objects.all()
 
 
+#
+#
 class CommentsRetrieveDestroy(RetrieveDestroyAPIView):
     """Удаляем комментарий ,только для автора или или админа, или, если комментарий к новости автора"""
     serializer_class = CommentsSerializer
 
-    permission_classes = [SelfCommentsOrCommentsSelfNews]
+    permission_classes = [AuthorCommentsOrCommentsAuthorNews]
 
     def get_queryset(self):
         return Comments.objects.all()
 
 
+#
+#
 class LikesCreate(CreateAPIView):
     """Ставим лайк по POST запросу ,PK новости в URL адресе
         Проверка чтобы нельзя было поставить два лайка от одного юзера одной новости.
@@ -107,7 +100,7 @@ def signup(request):
             return JsonResponse({'token': str(token)}, status=201)
         except IntegrityError:
             return JsonResponse({'error': 'username taken. choose another username'}, status=400)
-    return JsonResponse({'error': 'enter username and password'}, status=201)
+    return JsonResponse({'error': 'send POST with username and password'}, status=201)
 
 
 @csrf_exempt
@@ -124,4 +117,4 @@ def login(request):
             except:
                 token = Token.objects.create(user=user)
             return JsonResponse({'token': str(token)}, status=201)
-    return JsonResponse({'error': 'enter username and password'}, status=201)
+    return JsonResponse({'error': 'send POST with username and password'}, status=201)
